@@ -127,21 +127,23 @@ def lose():
     toplv = Tkinter.Toplevel()
     frame = Tkinter.Frame(toplv)
     frame.pack()
+    #重新開始的按鈕跟離開的按鈕
     restart_button = Tkinter.Button(frame, text="New Game", borderwidth=5, width=10, command=lambda: end_restart())
     restart_button.grid(row=0, column=0)
     exit_button = Tkinter.Button(frame, text="Exit", borderwidth=5, width=10, command=lambda: exit())
     exit_button.grid(row=1, column=0)
 
-
+#遊戲結束時的new game
 def end_restart():
     toplv.destroy()
     restart()
 
-
+#遊戲還沒結束時的new game (其實可以用try except做) 
 def restart():
     global round
     global ans_list
     global t
+    #各種初始化跟timer重開
     ans_list = []
     round = 0
     gen_ran()
@@ -151,11 +153,12 @@ def restart():
     t = Timer(1.0, add_time)
     t.start()
 
-
+#檢查幾A幾B的function，會回傳字串XAXB
 def check_ab(input):
     global ans
     a = 0
     b = 0
+    #如果輸入的字串的各個字元有在答案裡，位置一樣就a++，不然就b++
     for char in input:
         i = ans.find(char)
         if i != -1:
@@ -165,49 +168,58 @@ def check_ab(input):
                 b += 1
     return str(a) + "A" + str(b) + "B"
 
-
+#送出答案時呼叫的function
 def guess():
     global round
     global ans_list
     global ans
+    #把使用者輸入存起來然後清空輸入框
     input = enter_box.get()
     enter_box.delete(0, END)
+    #檢查長度是否為4
     if len(input) != 4:
         result = input + "\tInvalid Input!! (Length Error)\n"
         result_box.insert(Tkinter.END, result)
         return
+    #檢查是否都是數字
     if not input.isdigit():
         result = input + "\tInvalid Input!! (Input not Number)\n"
         result_box.insert(Tkinter.END, result)
         return
+    #檢查4個數字裡面有沒有重複的
     for i in range(0, 4):
         if input.find(input[i], i + 1) != -1:
             result = input + "\tInvalid Input!! (Charcter Repeat)\n"
             result_box.insert(Tkinter.END, result)
             return
+    #檢查有沒有輸入過這個答案
     if input in ans_list:
         result = input + "\tInvalid Input!! (Repeated Guess)\n"
         result_box.insert(Tkinter.END, result)
         return
+    #確認沒問題後回合數+1(初始為0) ，並把答案塞到答案陣列裡(用來檢查有沒有輸入過用)
     round += 1
     ans_list.insert(0, input)
+    #呼叫funtion看是幾A幾B並把結果塞到顯示框裡
     ab = check_ab(input)
     result = "Round" + str(round) + "\t" + input + "\t" + ab + "\n"
     result_box.insert(Tkinter.END, result)
+    #如果猜中了就呼叫猜贏的function
     if ab == "4A0B":
         result_box.insert(Tkinter.END, "You win!!")
         t.cancel()
         win()
+    #超過十回合就輸了
     elif round >= 10:
         result_box.insert(Tkinter.END, "You lose.\n QQ Answer is " + ans)
         lose()
 
-
+#遊戲結束
 def exit():
     t.cancel()
     top.destroy()
 
-
+#遊戲開始
 t = Timer(1.0, add_time)
 t.start()
 gen_ran()
